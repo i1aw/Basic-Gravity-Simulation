@@ -69,12 +69,12 @@ id = setInterval(tick, 10);
     scale(secondsDiv, 0.01, 0.9, 250);
     scale(percent, 0.02, 0.9, 250);
     const d = new Date();
-    var x = Date.parse('21 Oct 2022 8:04:00') - Math.floor(d.getTime());
+    var x = Date.parse('21 Oct 2022 20:04:00') - Math.floor(d.getTime());
     x = Math.floor( x / 1000 / 60 / 60 * 100) / 100;
     x = x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     secondsDiv.innerHTML = x + " hours or around " + Math.ceil((x / 24)) + " days until you get home";
-    var timeOfVisit =  (Date.parse('21 Oct 2022 8:04:00') - Date.parse('12 Oct 2022 8:20:00')) / 1000;
-    var timeLeft = timeOfVisit - (Date.parse('21 Oct 2022 8:04:00') - Math.floor(d.getTime())) / 1000;
+    var timeOfVisit =  (Date.parse('21 Oct 2022 20:04:00') - Date.parse('12 Oct 2022 8:20:00')) / 1000;
+    var timeLeft = timeOfVisit - (Date.parse('21 Oct 2022 20:04:00') - Math.floor(d.getTime())) / 1000;
     percent.innerHTML = String(Math.floor(timeLeft / timeOfVisit * 10000) / 100) + '% of the way through';
 
 
