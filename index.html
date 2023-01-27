@@ -24,16 +24,9 @@
         height: 50px;
         font-size: 24px;
         transition: background-color 0.2s;
+        --clicked: 0;
     }
-    button:hover {
-        background-color: rgb(0, 134, 211);
 
-
-    }
-    button:active {
-        background-color: rgb(0, 162, 255);
-
-    }
     .button2 {
         left: 221px
     }
@@ -60,23 +53,6 @@
         width: 100px;
 
     }
-    /* .mass {
-        top: 70px;
-
-
-    }
-    .xv {
-        top: 100px;
-        
-
-    }
-    .yv {
-        top: 130px;
-        
-
-    } */
-
-
 
 
 </style>
@@ -100,12 +76,15 @@
 <script>
 	document.getElementById("canvas").width = window.innerWidth 
 	document.getElementById("canvas").height = window.innerHeight 
-    const ctx = document.getElementById("canvas").getContext('2d')
+    const addButton = document.getElementById("add");
+    const removeButton = document.getElementById("remove");
+    const ctx = document.getElementById("canvas").getContext('2d');
     let state = "default";
     let planets = [];
     let cameraX = 0;
     let cameraY = 0;
-    let G = 1;
+    let cameraZ = 0.51315811823;
+    let G = 5;
     let time = 1;
     let leftPressed = false;
     let upPressed = false;
@@ -130,7 +109,7 @@
     function drawPlanet(m,x,y,color) {
         let r = Math.round(Math.sqrt(m/Math.PI)) * 20;
         ctx.beginPath();
-        ctx.arc(x-cameraX,y-cameraY,r,0,Math.PI*2, true);
+        ctx.arc((x - cameraX) * cameraZ + window.innerWidth / 2,(y - cameraY) * cameraZ  + window.innerHeight  / 2,r * cameraZ,0,Math.PI*2, true);
         ctx.fillStyle = color;
         ctx.fill();
     }
@@ -160,16 +139,17 @@
 
 	}
 
-    function getDistance(x1, y1, x2, y2){
-    let y = x2 - x1;
-    let x = y2 - y1;
-    
-    return Math.sqrt(x * x + y * y);
+    function getDistance(x1, y1, x2, y2) {
+
+        let y = x2 - x1;
+        let x = y2 - y1;
+        return Math.sqrt(x * x + y * y);
+
     }
 
     function planetAtPoint(list,x,y) {
         for (i=0;i<list.length;i++) {
-            if ( getDistance(list[i].x,list[i].y,x,y) < Math.round(Math.sqrt(list[i].mass/Math.PI)) * 20) {return i}
+            if (getDistance(list[i].x, list[i].y,x,y) < Math.round(Math.sqrt(list[i].mass/Math.PI)) * 20) {return i}
             
 
         }
@@ -185,40 +165,45 @@
 
     function updateFrame() {
         // time = document.getElementById('time').
-        if (leftPressed) {cameraX -= 10}
-        if (rightPressed) {cameraX += 10}
-        if (upPressed) {cameraY -= 10}
-        if (downPressed) {cameraY += 10}
+        if (leftPressed) {cameraX -= 10 / cameraZ}
+        if (rightPressed) {cameraX += 10 / cameraZ}
+        if (upPressed) {cameraY -= 10 / cameraZ}
+        if (downPressed) {cameraY += 10 / cameraZ}
         calculatePlanets(planets);
         drawPlanetsFromList(planets);
 
     }
 
     function removeButtonClicked() {
-        if (state != "remove") {state = "remove"} else {state = "default"}
+        if (state != "remove") {state = "remove";addButton.style.backgroundColor = '#1b8ac2';removeButton.style.backgroundColor = '#adcfe0';} else {state = "default";removeButton.style.backgroundColor = '#1b8ac2';addButton.style.backgroundColor = '#1b8ac2';}
     }
 
     function addButtonClicked() {
-        if (state != "add") {state = "add"} else {state = "default"}
+        if (state != "add") {state = "add";removeButton.style.backgroundColor = '#1b8ac2';addButton.style.backgroundColor = '#adcfe0';} else {state = "default";removeButton.style.backgroundColor = '#1b8ac2';addButton.style.backgroundColor = '#1b8ac2';}
     }
 
     function mouseButtonClicked(event) {
         if (state == "remove") {
-            let removedPlanet = planetAtPoint(planets,event.clientX + cameraX,event.clientY + cameraY);
+            
+            let removedPlanet = planetAtPoint(planets,(event.clientX - window.innerWidth / 2) / cameraZ + cameraX,(event.clientY - window.innerHeight / 2) / cameraZ + cameraY);
             if (removedPlanet >= 0) {planets.splice(removedPlanet,1)}
             state = "default";
+            removeButton.style.backgroundColor = '#1b8ac2';
+            addButton.style.backgroundColor = '#1b8ac2';
 
         }
         if (state == "add") {
-            createPlanet(parseInt(prompt("Input mass 1-10,000")),event.clientX + cameraX,event.clientY + cameraY,parseInt(prompt("Input x velocity -30-30")),parseInt(prompt("Input y velocity -30-30")),"#" + ((1<<24)*Math.random() | 0).toString(16))
+            createPlanet(parseInt(prompt("Input mass 1-10,000")),(event.clientX - window.innerWidth / 2) / cameraZ + cameraX,(event.clientY - window.innerHeight / 2) / cameraZ + cameraY,parseInt(prompt("Input x velocity -30-30")),parseInt(prompt("Input y velocity -30-30")),"#" + ((1<<24)*Math.random() | 0).toString(16))
             state = "default";
+            removeButton.style.backgroundColor = '#1b8ac2';
+            addButton.style.backgroundColor = '#1b8ac2';
 
         }
 
     }
 
-    createPlanet(400,800,400,0,0, "#" + ((1<<24)*Math.random() | 0).toString(16));
-    createPlanet(50,800,800,8,0, "#" + ((1<<24)*Math.random() | 0).toString(16));
+    createPlanet(400,0,0,0,0, "#" + ((1<<24)*Math.random() | 0).toString(16));
+    createPlanet(50,0,1000,10,0, "#" + ((1<<24)*Math.random() | 0).toString(16));
     id = setInterval(updateFrame,33);
 
 
@@ -254,6 +239,25 @@ document.addEventListener('keyup', function(event) {
         downPressed = false;
     }
     });
+
+    var scrollableElement = document.body; //document.getElementById('scrollableElement');
+
+scrollableElement.addEventListener('wheel', checkScrollDirection);
+
+function checkScrollDirection(event) {
+  if (checkScrollDirectionIsUp(event)) {
+    cameraZ *= 1.1;
+  } else {
+    cameraZ /= 1.1;
+  }
+}
+
+function checkScrollDirectionIsUp(event) {
+  if (event.wheelDelta) {
+    return event.wheelDelta > 0;
+  }
+  return event.deltaY < 0;
+}
     
 
     
