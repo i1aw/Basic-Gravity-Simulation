@@ -5,7 +5,7 @@
         height : 100%;
         width : 100%;
     }
-    canvas { 
+    canvas {
         background-color: #141414;
         display: block;
         position: absolute;
@@ -42,14 +42,14 @@
     }
     div {
         position: absolute;
-        user-select: none; 
+        user-select: none;
         font-size: 23px;
         text-align: center;
         top: 100px;
     }
     input {
         position: relative;
-        user-select: none; 
+        user-select: none;
         width: 100px;
 
     }
@@ -61,7 +61,7 @@
 <button id="add" class="button1">Add a planet</button>
 <button id="remove" class="button2">Remove a planet</button>
 
-    
+   
 
 
 
@@ -74,12 +74,13 @@
 </html>
 
 <script>
-	document.getElementById("canvas").width = window.innerWidth 
-	document.getElementById("canvas").height = window.innerHeight 
+document.getElementById("canvas").width = window.innerWidth
+document.getElementById("canvas").height = window.innerHeight
     const addButton = document.getElementById("add");
     const removeButton = document.getElementById("remove");
     const ctx = document.getElementById("canvas").getContext('2d');
     let state = "default";
+    let targetID = -1;
     let planets = [];
     let cameraX = 0;
     let cameraY = 0;
@@ -90,54 +91,74 @@
     let upPressed = false;
     let downPressed = false;
     let rightPressed = false;
+    let nextID = 0;
     class planet {
-        constructor(mass,x,y,xv,yv,color) {
+        constructor(mass,x,y,xv,yv,color,id) {
             this.mass = mass;
             this.x = x;
             this.y = y;
             this.xv = xv;
             this.yv = yv;
             this.color = color;
+            this.id = id;
         }
-    
+   
     }
     function createPlanet(m,x,y,xv,yv,color) {
-        planets.push(new planet(m,x,y,xv,yv,color));
+        planets.push(new planet(m,x,y,xv,yv,color,nextID));
+        nextID++;
 
     }
 
-    function drawPlanet(m,x,y,color) {
+    function drawPlanet(m,x,y,color,selected) {
+        if (selected) {
+            let sr = Math.round(Math.sqrt(m/Math.PI)) * 20 + 12;
+            ctx.beginPath();
+            ctx.arc((x - cameraX) * cameraZ + window.innerWidth / 2,(y - cameraY) * cameraZ  + window.innerHeight  / 2,sr * cameraZ,0,Math.PI*2, true);
+            ctx.fillStyle = '#ebebeb';
+          ctx.fill();
+       
+      }
         let r = Math.round(Math.sqrt(m/Math.PI)) * 20;
         ctx.beginPath();
         ctx.arc((x - cameraX) * cameraZ + window.innerWidth / 2,(y - cameraY) * cameraZ  + window.innerHeight  / 2,r * cameraZ,0,Math.PI*2, true);
-        ctx.fillStyle = color;
+
+       
+          ctx.fillStyle = color;
+       
+
         ctx.fill();
     }
 
-	function calculatePlanets(list) {
+function calculatePlanets(list) {
 
-		for (i=0;i<list.length;i++) {
-			//calculate the gavity from other bodys
-			for (j=0;j<list.length;j++) {
-				if (list[i].x == list[j].x && list[i].y == list[j].y) {continue}
+    for (i=0;i<list.length;i++) {
+        //calculate the gavity from other bodys
+        for (j=0;j<list.length;j++) {
+            if (list[i].x == list[j].x && list[i].y == list[j].y) {continue}
 
-                let differanceX = list[j].x - list[i].x;
-                let differanceY = list[j].y - list[i].y;
+            let differanceX = list[j].x - list[i].x;
+            let differanceY = list[j].y - list[i].y;
 
-                // Calculate DeltaV from Gravity
-                let dist = Math.sqrt(differanceX * differanceX + differanceY * differanceY)
-                let F = G * (list[i].mass * list[j].mass / (dist * dist))
-                let dir = Math.atan2(differanceX,differanceY);
-                list[i].xv += F * Math.sin(dir);
-                list[i].yv += F * Math.cos(dir);
-            
-			}
+            // Calculate DeltaV from Gravity
+            let dist = Math.sqrt(differanceX * differanceX + differanceY * differanceY)
+            let F = G * (list[i].mass * list[j].mass / (dist * dist))
+            let dir = Math.atan2(differanceX,differanceY);
+            list[i].xv += F * Math.sin(dir);
+            list[i].yv += F * Math.cos(dir);
+
+            }
             list[i].x += list[i].xv / list[i].mass * 50 * time;
-			list[i].y += list[i].yv / list[i].mass * 50 * time;
-		}
+            list[i].y += list[i].yv / list[i].mass * 50 * time;
+            if (list[i].id==targetID) {
+                cameraX += list[i].xv / list[i].mass * 50 * time;
+                cameraY += list[i].yv / list[i].mass * 50 * time;
+
+        }
+    }
 
 
-	}
+}
 
     function getDistance(x1, y1, x2, y2) {
 
@@ -150,7 +171,7 @@
     function planetAtPoint(list,x,y) {
         for (i=0;i<list.length;i++) {
             if (getDistance(list[i].x, list[i].y,x,y) < Math.round(Math.sqrt(list[i].mass/Math.PI)) * 20) {return i}
-            
+           
 
         }
         return -1;
@@ -159,7 +180,7 @@
     function drawPlanetsFromList(list) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (i=0;i<list.length;i++) {
-            drawPlanet(list[i].mass, list[i].x, list[i].y, list[i].color);
+            drawPlanet(list[i].mass, list[i].x, list[i].y, list[i].color,targetID == list[i].id);
         }
     }
 
@@ -183,8 +204,13 @@
     }
 
     function mouseButtonClicked(event) {
-        if (state == "remove") {
+        if (state == "default") {
             
+            targetID = planets[planetAtPoint(planets,(event.clientX - window.innerWidth / 2) / cameraZ + cameraX,(event.clientY - window.innerHeight / 2) / cameraZ + cameraY)].id;
+           
+        }
+        if (state == "remove") {
+           
             let removedPlanet = planetAtPoint(planets,(event.clientX - window.innerWidth / 2) / cameraZ + cameraX,(event.clientY - window.innerHeight / 2) / cameraZ + cameraY);
             if (removedPlanet >= 0) {planets.splice(removedPlanet,1)}
             state = "default";
@@ -200,8 +226,8 @@
             state = "default";
             removeButton.style.backgroundColor = '#1b8ac2';
             addButton.style.backgroundColor = '#1b8ac2';
-
         }
+
 
     }
 
@@ -261,7 +287,7 @@ function checkScrollDirectionIsUp(event) {
   }
   return event.deltaY < 0;
 }
-    
+   
 
-    
+   
     </script>
