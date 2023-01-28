@@ -205,8 +205,15 @@ function calculatePlanets(list) {
 
     function mouseButtonClicked(event) {
         if (state == "default") {
+            let target = planetAtPoint(planets,(event.clientX - window.innerWidth / 2) / cameraZ + cameraX,(event.clientY - window.innerHeight / 2) / cameraZ + cameraY);
+            if (target >= 0) {
+                targetID = planets[target].id;
+            } else {
+                targetID = -1;
+            }
             
-            targetID = planets[planetAtPoint(planets,(event.clientX - window.innerWidth / 2) / cameraZ + cameraX,(event.clientY - window.innerHeight / 2) / cameraZ + cameraY)].id;
+            
+           
            
         }
         if (state == "remove") {
@@ -247,10 +254,10 @@ function calculatePlanets(list) {
     if(event.keyCode == 38 || event.keyCode == 87) {
         upPressed = true;
     }
-    else if(event.keyCode == 39 || event.keyCode == 68) {
+    if(event.keyCode == 39 || event.keyCode == 68) {
         rightPressed = true;
     }
-    else if(event.keyCode == 40 || event.keyCode == 83) {
+    if(event.keyCode == 40 || event.keyCode == 83) {
         downPressed = true;
     }
     });
@@ -261,10 +268,10 @@ document.addEventListener('keyup', function(event) {
     if(event.keyCode == 38 || event.keyCode == 87) {
         upPressed = false;
     }
-    else if(event.keyCode == 39 || event.keyCode == 68) {
+    if(event.keyCode == 39 || event.keyCode == 68) {
         rightPressed = false;
     }
-    else if(event.keyCode == 40 || event.keyCode == 83) {
+    if(event.keyCode == 40 || event.keyCode == 83) {
         downPressed = false;
     }
     });
