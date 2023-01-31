@@ -24,7 +24,6 @@
         height: 50px;
         font-size: 24px;
         transition: background-color 0.2s;
-        --clicked: 0;
     }
 
     .button2 {
@@ -40,36 +39,60 @@
 
 
     }
-    div {
+    /* div {
         position: absolute;
         user-select: none;
         font-size: 23px;
         text-align: center;
         top: 100px;
-    }
+    } */
     input {
         position: relative;
         user-select: none;
         width: 100px;
 
     }
+    .helpButton {
+
+        width: 50px;
+        height: 50px;
+        left: 433px;
+
+
+    }
+    #help {
+        left: 495px;
+        width: 25%;
+        height: 25%;
+        text-align:left;
+        position: absolute;
+        background-color: rgb(7, 120, 185);
+        border: 0px;
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 115%;
+        top: 9px;
+        display: inline-block;
+        height: auto;
+
+
+    }
+    .hide {
+
+        visibility: hidden;
+
+    }
 
 
 </style>
+
 <html>
+
 <canvas id="canvas"></canvas>
 <button id="add" class="button1">Add a planet</button>
 <button id="remove" class="button2">Remove a planet</button>
-
-   
-
-
-
-
-
-
-
-
+<button id="helpButton" class="helpButton">?</button>
+<div id="help">• You can move the camera with WASD or the arrow keys.<br> • Use the scroll wheel to zoom in and out.<br> • To target a planet, click on it. The camera will then move relative to the planet. Click somewhere else to stop selecting a planet.<br> • To add a planet, select the 'Add a planet' button and click where you want to place a planet. Enter the mass and velocitys for you planet.<br> • To remove a planet, click on the 'Remove a planet' button and click on the planet you want to remove.</div>
 
 </html>
 
@@ -92,6 +115,8 @@ document.getElementById("canvas").height = window.innerHeight
     let downPressed = false;
     let rightPressed = false;
     let nextID = 0;
+    let help = document.getElementById("help");
+    help.classList.toggle("hide");
     class planet {
         constructor(mass,x,y,xv,yv,color,id) {
             this.mass = mass;
@@ -246,6 +271,7 @@ function calculatePlanets(list) {
     document.getElementById('remove').addEventListener('click', removeButtonClicked);
     document.getElementById('add').addEventListener('click', addButtonClicked);
     document.getElementById('canvas').addEventListener("click", mouseButtonClicked);
+    document.getElementById('helpButton').addEventListener("click", showHelp);
 
     document.addEventListener('keydown', function(event) {
     if(event.keyCode == 37 || event.keyCode == 65) {
@@ -254,10 +280,10 @@ function calculatePlanets(list) {
     if(event.keyCode == 38 || event.keyCode == 87) {
         upPressed = true;
     }
-    if(event.keyCode == 39 || event.keyCode == 68) {
+    else if(event.keyCode == 39 || event.keyCode == 68) {
         rightPressed = true;
     }
-    if(event.keyCode == 40 || event.keyCode == 83) {
+    else if(event.keyCode == 40 || event.keyCode == 83) {
         downPressed = true;
     }
     });
@@ -268,10 +294,10 @@ document.addEventListener('keyup', function(event) {
     if(event.keyCode == 38 || event.keyCode == 87) {
         upPressed = false;
     }
-    if(event.keyCode == 39 || event.keyCode == 68) {
+    else if(event.keyCode == 39 || event.keyCode == 68) {
         rightPressed = false;
     }
-    if(event.keyCode == 40 || event.keyCode == 83) {
+    else if(event.keyCode == 40 || event.keyCode == 83) {
         downPressed = false;
     }
     });
@@ -294,6 +320,14 @@ function checkScrollDirectionIsUp(event) {
   }
   return event.deltaY < 0;
 }
+
+function showHelp(event) {
+    let help = document.getElementById("help");
+    help.classList.toggle("hide");
+
+}
+
+
    
 
    
