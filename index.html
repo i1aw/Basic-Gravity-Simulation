@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <style>
-
     body {
         height : 100%;
         width : 100%;
+        font-family:'Times New Roman', Times, serif;
     }
     canvas {
         background-color: #141414;
@@ -14,7 +14,7 @@
         left: 0;
         right: 0;
     }
-    button {
+    .button {
         position: absolute;
         user-select: none;
         background-color: rgb(7, 120, 185);
@@ -27,6 +27,15 @@
     }
 
     .button2 {
+        position: absolute;
+        user-select: none;
+        background-color: rgb(7, 120, 185);
+        border: 0px;
+        border-radius: 10px;
+        width: 200px;
+        height: 50px;
+        font-size: 24px;
+        transition: background-color 0.2s;
         left: 221px
     }
     .slider {
@@ -53,7 +62,15 @@
 
     }
     .helpButton {
-
+        position: absolute;
+        user-select: none;
+        background-color: rgb(7, 120, 185);
+        border: 0px;
+        border-radius: 10px;
+        width: 200px;
+        height: 50px;
+        font-size: 24px;
+        transition: background-color 0.2s;
         width: 50px;
         height: 50px;
         left: 433px;
@@ -82,18 +99,91 @@
         visibility: hidden;
 
     }
+    .creationMenu {
+        z-index: 11;
+        position: absolute;
+        background-color: rgb(67, 144, 189);
+        border-radius: 10px;
+        padding: 20px;
+        /* display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content:right; */
+
+        
+
+
+
+
+    }
+    .creationMenuNumber {
+        z-index: 12;
+        display: flex;
+        flex-direction: column;
+        align-self: center;
+        justify-self:center;
+        height: 20px;
+        width: 50%;
+        border-radius: 5px;
+        
+    }
+    .creationMenucheckbox {
+        z-index: 13;
+        display: flex;
+        flex-direction: column;
+        align-self: center;
+        justify-self:center;
+        height: 15px;
+        width: 15px;
+        border-radius: 10px;
+
+    }
+    .CMbackground {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        background-color: rgba(255, 255, 255, 0.034);
+        backdrop-filter: blur(2.5px);
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+
+
+    }
 
 
 </style>
 
 <html>
+<body>
 
 <canvas id="canvas"></canvas>
-<button id="add" class="button1">Add a planet</button>
+<button id="add" class="button">Add a planet</button>
 <button id="remove" class="button2">Remove a planet</button>
 <button id="helpButton" class="helpButton">?</button>
-<div id="help">• You can move the camera with WASD or the arrow keys.<br> • Use the scroll wheel to zoom in and out.<br> • To target a planet, click on it. The camera will then move relative to the planet. Click somewhere else to stop selecting a planet.<br> • To add a planet, select the 'Add a planet' button and click where you want to place a planet. Enter the mass and velocitys for your planet.<br> • To remove a planet, click on the 'Remove a planet' button and click on the planet you want to remove.</div>
+<div id="help">• You can move the camera with WASD or the arrow keys.<br> • Use the scroll wheel to zoom in and out.<br> • To target a planet, click on it. The camera will then move relative to the planet. Click somewhere else to stop selecting a planet.<br> • To add a planet, select the 'Add a planet' button and click where you want to place a planet. Enter the mass and velocitys for you planet.<br> • To remove a planet, click on the 'Remove a planet' button and click on the planet you want to remove.</div>
+<div id="CMBackground" class="CMbackground">
+    <div id="creationMenu" class="creationMenu">
+        <label for="mass" style="z-index: 13;">Mass:</label>
+        <input type="number" id="mass" class="creationMenuNumber"> <br>
+        <label for="xv" style="z-index: 13;">X velocity:</label>
+        <input type="number" id="xv" class="creationMenuNumber"><br>
+        <label for="yv" style="z-index: 13;">Y velocity:</label>
+        <input type="number" id="yv" class="creationMenuNumber" style="z-index: 13;"><br>
+        <label for="addSelectedVelocity" style="z-index: 13;">Add velocity of currently selected planet:</label>
+        <input type="checkbox" id="addSelectedVelocity" class="creationMenucheckbox">
+        <button id="confirm">confirm</button>
+    
+    
+    
+        
+    </div>
+</div>
 
+</body>
 </html>
 
 <script>
@@ -115,8 +205,14 @@ document.getElementById("canvas").height = window.innerHeight
     let downPressed = false;
     let rightPressed = false;
     let nextID = 0;
+    let clickX = 0;
+    let clickY = 0;
+    let selectedXv = 0;
+    let selectedYv = 0;
     let help = document.getElementById("help");
     help.classList.toggle("hide");
+    let cm = document.getElementById("CMBackground");
+    cm.classList.toggle("hide");
     class planet {
         constructor(mass,x,y,xv,yv,color,id) {
             this.mass = mass;
@@ -169,8 +265,8 @@ function calculatePlanets(list) {
             let dist = Math.sqrt(differanceX * differanceX + differanceY * differanceY)
             let F = G * (list[i].mass * list[j].mass / (dist * dist))
             let dir = Math.atan2(differanceX,differanceY);
-            list[i].xv += F * Math.sin(dir);
-            list[i].yv += F * Math.cos(dir);
+            list[i].xv += F * Math.sin(dir) * time;
+            list[i].yv += F * Math.cos(dir) * time;
 
             }
             list[i].x += list[i].xv / list[i].mass * 50 * time;
@@ -178,6 +274,9 @@ function calculatePlanets(list) {
             if (list[i].id==targetID) {
                 cameraX += list[i].xv / list[i].mass * 50 * time;
                 cameraY += list[i].yv / list[i].mass * 50 * time;
+                selectedXv = list[i].xv / list[i].mass * 50;
+                selectedYv = list[i].yv / list[i].mass * 50;
+
 
         }
     }
@@ -237,9 +336,6 @@ function calculatePlanets(list) {
                 targetID = -1;
             }
             
-            
-           
-           
         }
         if (state == "remove") {
            
@@ -251,17 +347,44 @@ function calculatePlanets(list) {
 
         }
         if (state == "add") {
-            let mass = parseInt(prompt("Input mass 1-10,000"));
-            let xv = parseInt(prompt("Input x velocity -30-30")) * mass / 20;
-            let yv = parseInt(prompt("Input y velocity -30-30")) * -1 * mass / 20;
-            createPlanet(mass,(event.clientX - window.innerWidth / 2) / cameraZ + cameraX,(event.clientY - window.innerHeight / 2) / cameraZ + cameraY,xv,yv,"#" + ((1<<24)*Math.random() | 0).toString(16))
-            state = "default";
-            removeButton.style.backgroundColor = '#1b8ac2';
-            addButton.style.backgroundColor = '#1b8ac2';
+            // let mass = parseInt(prompt("Input mass 1-10,000"));
+            // let xv = parseInt(prompt("Input x velocity -30-30")) * mass / 20;
+            // let yv = parseInt(prompt("Input y velocity -30-30")) * -1 * mass / 20;
+            time = 0;
+            cm.classList.toggle("hide");
+            clickX = event.clientX;
+            clickY = event.clientY;
+
+            // createPlanet(mass,(event.clientX - window.innerWidth / 2) / cameraZ + cameraX,(event.clientY - window.innerHeight / 2) / cameraZ + cameraY,xv,yv,"#" + ((1<<24)*Math.random() | 0).toString(16))
+            // state = "default";
+            // time = 1;
+            // removeButton.style.backgroundColor = '#1b8ac2';
+            // addButton.style.backgroundColor = '#1b8ac2';
         }
 
 
     }
+    function createPlanetFromMenu() {
+        let massInput = document.getElementById("mass").value;
+        let xvInput = document.getElementById("xv").value;
+        let yvInput = document.getElementById("yv").value;
+        let addSelectedVelocity = document.getElementById("addSelectedVelocity").checked;
+        if (addSelectedVelocity && targetID != -1) {
+            createPlanet(Math.abs(massInput), parseFloat((clickX - window.innerWidth / 2) / cameraZ + cameraX), parseFloat((clickY - window.innerHeight / 2) / cameraZ + cameraY), parseFloat(xvInput) + selectedXv, parseFloat(yvInput) + selectedYv, "#" + ((1<<24)*Math.random() | 0).toString(16));
+
+        } else {
+            createPlanet(Math.abs(massInput), parseFloat((clickX - window.innerWidth / 2) / cameraZ + cameraX), parseFloat((clickY - window.innerHeight / 2) / cameraZ + cameraY), parseFloat(xvInput), parseFloat(yvInput), "#" + ((1<<24)*Math.random() | 0).toString(16));
+
+        }
+        console.log((clickX - window.innerWidth / 2) / cameraZ + cameraX);
+        state = "default";
+        time = 1;
+        removeButton.style.backgroundColor = '#1b8ac2';
+        addButton.style.backgroundColor = '#1b8ac2';
+        cm.classList.toggle("hide");
+
+    }
+
 
     createPlanet(400,0,0,0,0, "#" + ((1<<24)*Math.random() | 0).toString(16));
     createPlanet(50,0,1000,10,0, "#" + ((1<<24)*Math.random() | 0).toString(16));
@@ -272,6 +395,7 @@ function calculatePlanets(list) {
     document.getElementById('add').addEventListener('click', addButtonClicked);
     document.getElementById('canvas').addEventListener("click", mouseButtonClicked);
     document.getElementById('helpButton').addEventListener("click", showHelp);
+    document.getElementById('confirm').addEventListener('click', createPlanetFromMenu);
 
     document.addEventListener('keydown', function(event) {
     if(event.keyCode == 37 || event.keyCode == 65) {
