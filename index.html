@@ -366,8 +366,8 @@ function calculatePlanets(list) {
     }
     function createPlanetFromMenu() {
         let massInput = document.getElementById("mass").value;
-        let xvInput = document.getElementById("xv").value;
-        let yvInput = document.getElementById("yv").value;
+        let xvInput = document.getElementById("xv").value * mass / 20;
+        let yvInput = document.getElementById("yv").value * -1 * mass / 20;
         let addSelectedVelocity = document.getElementById("addSelectedVelocity").checked;
         if (addSelectedVelocity && targetID != -1) {
             createPlanet(Math.abs(massInput), parseFloat((clickX - window.innerWidth / 2) / cameraZ + cameraX), parseFloat((clickY - window.innerHeight / 2) / cameraZ + cameraY), parseFloat(xvInput) + selectedXv, parseFloat(yvInput) + selectedYv, "#" + ((1<<24)*Math.random() | 0).toString(16));
